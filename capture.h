@@ -1,3 +1,5 @@
+#pragma once
+
 #include <boost/noncopyable.hpp>
 #include <soundio/soundio.h>
 
@@ -7,26 +9,28 @@
 #include <vector>
 
 struct Channel {
-  std::deque<float> samples{};
+    std::deque<float> samples{};
 };
 
 struct RecordingContext {
-  std::vector<Channel> channels{};
-  int buffer_size{0};
-  std::mutex mutex{};
+    std::vector<Channel> channels{};
+    int buffer_size{0};
+    std::mutex mutex{};
 };
 
 class Capture : private boost::noncopyable {
-public:
-  Capture(const std::string &device_id);
-  ~Capture();
+  public:
+    Capture(const std::string &device_id);
+    ~Capture();
 
-  void start_capture();
-  void flush();
+    void start_capture();
+    void flush();
+    std::vector<float> data(int channel_index);
+    int sample_rate() const;
 
-private:
-  SoundIo *soundio_{nullptr};
-  SoundIoDevice *device_{nullptr};
-  SoundIoInStream *instream_{nullptr};
-  RecordingContext record_context_{};
+  private:
+    SoundIo *soundio_{nullptr};
+    SoundIoDevice *device_{nullptr};
+    SoundIoInStream *instream_{nullptr};
+    RecordingContext recording_context_{};
 };

@@ -4,7 +4,7 @@ project(mvisualizer)
 find_package(spdlog CONFIG REQUIRED)
 link_libraries(spdlog::spdlog spdlog::spdlog_header_only)
 
-link_libraries(m soundio)
+link_libraries(m soundio SDL2 SDL2_ttf kiss_fft_float)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -19,6 +19,8 @@ add_executable(mvisualizer
     main.cpp
     capture.cpp
     capture.h
+    fft.cpp
+    fft.h
     window.cpp
     window.h
 )

@@ -2,18 +2,19 @@
 #include "fft.h"
 #include "window.h"
 
+#include <chrono>
+#include <fmt/core.h>
 #include <spdlog/spdlog.h>
+#include <thread>
 
 std::vector<float> bin(const std::vector<float> &data, int num_bins) {
+    const std::size_t n = data.size();
+    const std::size_t bin_size = n / num_bins;
     std::vector<float> bins(num_bins);
 
     for (std::size_t i = 0; i < data.size(); i++) {
-        std::size_t bin = i / num_bins;
-        bins[bin] += data[i];
-    }
-
-    for (std::size_t i = 0; i < bins.size(); i++) {
-        bins[i] /= (data.size() / num_bins);
+        std::size_t bin = i / bin_size;
+        bins[bin] += data[i] / bin_size;
     }
 
     return bins;
@@ -30,6 +31,7 @@ int main() {
 
     Window window;
     while (true) {
+        auto start = std::chrono::steady_clock::now();
         std::vector<float> data = capture.data(0);
         std::vector<float> fft_output = fft_analyze(data);
         std::vector<float> bins = bin(fft_output, 100);
@@ -38,5 +40,8 @@ int main() {
         if (!go) {
             break;
         }
+
+        auto sleep_until = start + std::chrono::milliseconds{16};
+        std::this_thread::sleep_until(sleep_until);
     }
 }

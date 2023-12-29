@@ -38,6 +38,7 @@ void read_callback(SoundIoInStream *instream, int, int frame_count_max) {
             for (int frame = 0; frame < read_frames; frame++) {
                 float sample = *reinterpret_cast<float *>(channel_area.ptr);
                 channel_buffer.push_back(sample);
+                channel_area.ptr += channel_area.step;
             }
         }
     } else {
@@ -97,7 +98,7 @@ Capture::Capture(const std::string &device_id) {
         throw std::runtime_error(fmt::format("Failed to open instream: {}", soundio_strerror(err)));
     }
 
-    recording_context_.buffer_size = instream_->sample_rate * 0.1;
+    recording_context_.buffer_size = 1024;
     recording_context_.channels.resize(instream_->layout.channel_count);
 }
 

@@ -44,22 +44,21 @@ std::vector<float> bin(const std::vector<float> &fft_output, const std::vector<f
 
         float current_freq_cutoff = min_freq;
         std::size_t current_bin = 0;
-        std::size_t added_to_current_bin = 0;
+        float current_bin_max_magnitude = 0.0f;
         std::size_t i = 0;
 
         while (i < n) {
             float current_freq = freqs[i];
 
             if (current_freq > current_freq_cutoff && current_bin < bins.size()) {
-                bins[current_bin] /= added_to_current_bin;
-                added_to_current_bin = 0;
+                bins[current_bin] = current_bin_max_magnitude;
+                current_bin_max_magnitude = 0.0f;
                 current_bin++;
                 current_freq_cutoff *= base;
             }
 
             float current_magnitude = fft_output[i];
-            bins[current_bin] += current_magnitude;
-            added_to_current_bin++;
+            current_bin_max_magnitude = std::max(current_bin_max_magnitude, current_magnitude);
             i++;
         }
     } else {
@@ -80,6 +79,7 @@ int main() {
     spdlog::default_logger()->set_level(spdlog::level::debug);
 
     Capture capture("Family 17h/19h HD Audio Controller Analog Stereo");
+    capture.list_devices();
     capture.start_capture();
 
     int sample_rate = capture.sample_rate();
@@ -95,8 +95,8 @@ int main() {
 
         std::vector<float> data = capture.data(0);
         std::vector<float> fft_output = fft_analyze(data);
-        normalize(fft_output);
         std::vector<float> bins = bin(fft_output, fft_freqs, bin_count);
+        normalize(bins);
 
         window.update(bins);
         bool go = window.render();

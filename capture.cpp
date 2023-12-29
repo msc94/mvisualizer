@@ -108,6 +108,15 @@ Capture::~Capture() {
     soundio_destroy(soundio_);
 }
 
+void Capture::list_devices() {
+    spdlog::info("Available devices:");
+    for (int i = 0; i < soundio_input_device_count(soundio_); i++) {
+        SoundIoDevice *device = soundio_get_input_device(soundio_, i);
+        spdlog::info("  - {}", device->id);
+        soundio_device_unref(device);
+    }
+}
+
 void Capture::start_capture() {
     int err = SoundIoErrorNone;
     if ((err = soundio_instream_start(instream_)) != SoundIoErrorNone) {

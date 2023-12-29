@@ -23,6 +23,7 @@ class Capture : private boost::noncopyable {
     Capture(const std::string &device_id);
     ~Capture();
 
+    void list_devices();
     void start_capture();
     void flush();
     std::vector<float> data(int channel_index);

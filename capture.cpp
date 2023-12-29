@@ -1,5 +1,6 @@
 #include "capture.h"
 
+#include <cstddef>
 #include <fmt/format.h>
 #include <mutex>
 #include <soundio/soundio.h>
@@ -118,9 +119,17 @@ std::vector<float> Capture::data(int channel_index) {
     std::unique_lock lock{recording_context_.mutex};
     const Channel &channel = recording_context_.channels[channel_index];
     const std::deque<float> &samples = channel.samples;
-    return std::vector<float>{samples.begin(), samples.end()};
+    if (samples.size() < static_cast<std::size_t>(recording_context_.buffer_size)) {
+        return {};
+    } else {
+        return std::vector<float>{samples.begin(), samples.end()};
+    }
 }
 
 int Capture::sample_rate() const {
     return instream_->sample_rate;
+}
+
+int Capture::buffer_size() const {
+    return recording_context_.buffer_size;
 }

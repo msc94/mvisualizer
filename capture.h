@@ -27,6 +27,7 @@ class Capture : private boost::noncopyable {
     void flush();
     std::vector<float> data(int channel_index);
     int sample_rate() const;
+    int buffer_size() const;
 
   private:
     SoundIo *soundio_{nullptr};

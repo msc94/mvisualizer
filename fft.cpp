@@ -19,13 +19,13 @@ std::vector<float> fft_analyze(const std::vector<float> &data) {
     kiss_fft(cfg, input.data(), output.data());
     kiss_fft_free(cfg);
 
-    std::vector<float> magnitudes(N / 2);
+    std::vector<float> magnitudes(N);
     for (std::size_t i = 0; i < magnitudes.size(); i++) {
         magnitudes[i] = sqrtf(output[i].r * output[i].r + output[i].i * output[i].i);
     }
 
     float max_element = *std::max_element(magnitudes.begin(), magnitudes.end());
-    if (max_element > 0.f) {
+    if (max_element > 0.0f) {
         for (std::size_t i = 0; i < magnitudes.size(); i++) {
             magnitudes[i] /= max_element;
         }

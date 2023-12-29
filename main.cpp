@@ -7,14 +7,52 @@
 #include <spdlog/spdlog.h>
 #include <thread>
 
-std::vector<float> bin(const std::vector<float> &data, int num_bins) {
-    const std::size_t n = data.size();
-    const std::size_t bin_size = n / num_bins;
+std::vector<float> calc_fft_freqs(int fft_size, int sample_rate) {
+    std::vector<float> freqs(fft_size / 2);
+
+    for (std::size_t i = 0; i < freqs.size(); i++) {
+        freqs[i] = static_cast<float>(sample_rate) / fft_size * i;
+    }
+
+    return freqs;
+}
+
+std::vector<float> bin(const std::vector<float> &fft_output, const std::vector<float> freqs, int num_bins) {
+    // https://stackoverflow.com/questions/4364823/how-do-i-obtain-the-frequencies-of-each-value-in-an-fft
+
+    // Only use first half of FFT output (it's mirrored for real-valued inputs)
+    const std::size_t n = fft_output.size() / 2;
     std::vector<float> bins(num_bins);
 
-    for (std::size_t i = 0; i < data.size(); i++) {
-        std::size_t bin = i / bin_size;
-        bins[bin] += data[i] / bin_size;
+    constexpr bool exp_freqs = false;
+    if (exp_freqs) {
+        const float min_freq = freqs[1];
+        const float max_freq = freqs[freqs.size() - 2];
+        const float base = std::pow(max_freq / min_freq, 1.0 / num_bins);
+
+        float current_freq_cutoff = min_freq;
+        std::size_t current_bin = 0;
+        std::size_t i = 0;
+
+        while (i < n) {
+            float current_freq = freqs[i];
+
+            if (current_freq > current_freq_cutoff && current_bin < bins.size()) {
+                current_bin++;
+                current_freq_cutoff *= base;
+            }
+
+            float current_magnitude = fft_output[i];
+            bins[current_bin] += current_magnitude;
+            i++;
+        }
+    } else {
+        const std::size_t bin_size = n / num_bins;
+
+        for (std::size_t i = 0; i < n; i++) {
+            std::size_t bin = i / bin_size;
+            bins[bin] += fft_output[i];
+        }
     }
 
     return bins;
@@ -27,14 +65,17 @@ int main() {
     capture.start_capture();
 
     int sample_rate = capture.sample_rate();
-    spdlog::debug("Sample rate {}", sample_rate);
+    int fft_size = capture.buffer_size();
+    std::vector<float> fft_freqs = calc_fft_freqs(fft_size, sample_rate);
+    spdlog::debug("Sample rate {}, buffer size {}", sample_rate, fft_size);
 
     Window window;
     while (true) {
         auto start = std::chrono::steady_clock::now();
+
         std::vector<float> data = capture.data(0);
         std::vector<float> fft_output = fft_analyze(data);
-        std::vector<float> bins = bin(fft_output, 100);
+        std::vector<float> bins = bin(fft_output, fft_freqs, 100);
 
         bool go = window.render(bins);
         if (!go) {

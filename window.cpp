@@ -66,7 +66,7 @@ bool Window::render() {
     for (std::size_t i = 0; i < data_.size(); i++) {
         float d = data_[i] * height_;
 
-        SDL_FRect rect;
+        SDL_FRect rect = {};
         rect.x = bar_width * i;
         rect.y = height_ - d;
         rect.w = bar_width;

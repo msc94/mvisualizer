@@ -15,8 +15,10 @@ SET(CMAKE_COLOR_DIAGNOSTICS ON)
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
-add_compile_options(-fsanitize=address)
-add_link_options(-fsanitize=address)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
+    add_link_options(-fsanitize=address)
+endif()
 
 add_executable(mvisualizer
     main.cpp

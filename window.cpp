@@ -50,7 +50,7 @@ bool Window::render(const std::vector<float> &data) {
     int bar_width = width_ / data.size();
 
     for (std::size_t i = 0; i < data.size(); i++) {
-        float d = data[i] * 10.f;
+        float d = data[i] * height_;
 
         SDL_Rect rect;
         rect.x = bar_width * i;

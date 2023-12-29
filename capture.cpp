@@ -68,12 +68,11 @@ Capture::Capture(const std::string &device_id) {
 
     for (int i = 0; i < soundio_input_device_count(soundio_); i++) {
         SoundIoDevice *device = soundio_get_input_device(soundio_, i);
-
-        std::string id = device->id;
-        spdlog::debug("Current device id: {}\n", id);
+        const std::string &id = device->id;
 
         if (id == device_id) {
             device_ = device;
+            spdlog::debug("Choose device: {}", device_->id);
             break;
         }
 

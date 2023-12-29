@@ -61,17 +61,18 @@ bool Window::render() {
     SDL_RenderClear(renderer_);
     SDL_SetRenderDrawColor(renderer_, 0xFF, 0x00, 0x00, 0xFF);
 
-    int bar_width = width_ / data_.size();
+    float bar_width = static_cast<float>(width_) / data_.size();
+
     for (std::size_t i = 0; i < data_.size(); i++) {
         float d = data_[i] * height_;
 
-        SDL_Rect rect;
+        SDL_FRect rect;
         rect.x = bar_width * i;
         rect.y = height_ - d;
         rect.w = bar_width;
         rect.h = d;
 
-        SDL_RenderFillRect(renderer_, &rect);
+        SDL_RenderFillRectF(renderer_, &rect);
     }
 
     SDL_RenderPresent(renderer_);

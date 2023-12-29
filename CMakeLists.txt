@@ -15,6 +15,9 @@ SET(CMAKE_COLOR_DIAGNOSTICS ON)
 
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)
+
 add_executable(mvisualizer
     main.cpp
     capture.cpp

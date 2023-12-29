@@ -40,7 +40,7 @@ void Window::update(const std::vector<float> &values) {
         throw std::runtime_error("values.size() != data_.size()");
     }
 
-    constexpr float smoothness = 8;
+    constexpr float smoothness = 6;
     for (std::size_t i = 0; i < data_.size(); i++) {
         float delta = values[i] - data_[i];
         data_[i] += delta / smoothness;

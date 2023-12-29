@@ -11,15 +11,17 @@ struct WindowRenderingContext {
 
 class Window : private boost::noncopyable {
   public:
-    Window();
+    Window(int num_bins);
     ~Window();
 
-    bool render(const std::vector<float> &data);
+    void update(const std::vector<float> &values);
+    bool render();
 
   private:
-    const int width_{640};
-    const int height_{480};
-
+    int width_{640};
+    int height_{480};
     SDL_Window *window_;
     SDL_Renderer *renderer_;
+
+    std::vector<float> data_;
 };

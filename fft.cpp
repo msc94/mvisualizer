@@ -1,6 +1,7 @@
 #include "fft.h"
 
 #include <algorithm>
+#include <cmath>
 #include <fmt/format.h>
 #include <kissfft/kiss_fft.h>
 
@@ -23,7 +24,11 @@ std::vector<float> fft_analyze(const std::vector<float> &data) {
     for (std::size_t i = 0; i < magnitudes.size(); i++) {
         float power = output[i].r * output[i].r + output[i].i * output[i].i;
         float magnitude = sqrt(power);
-        magnitudes[i] = 20.0f * log10f(magnitude);
+        if (magnitude == 0.0f) {
+            magnitudes[i] = 0.0f;
+        } else {
+            magnitudes[i] = 20.0f * log10f(magnitude);
+        }
     }
 
     return magnitudes;

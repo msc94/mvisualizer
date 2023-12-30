@@ -23,6 +23,11 @@ std::vector<float> apply_hann(const std::vector<float> &data) {
 }
 
 std::vector<float> normalize(const std::vector<float> &data) {
+    constexpr bool normalize = true;
+    if (!normalize) {
+        return data;
+    }
+
     float max_element = *std::max_element(std::begin(data), std::end(data));
     if (max_element == 0.0f) {
         return data;
@@ -83,12 +88,22 @@ std::vector<float> bin(const std::vector<float> &fft_output, const std::vector<f
     return bins;
 }
 
+std::string get_device() {
+    constexpr bool use_microphone = false;
+    if (use_microphone) {
+        return " KLIM  LINGO Mono";
+    } else {
+        return "Family 17h/19h HD Audio Controller Analog Stereo";
+    }
+}
+
 } // namespace
 
 int main() {
     spdlog::default_logger()->set_level(spdlog::level::debug);
 
-    Capture capture("Family 17h/19h HD Audio Controller Analog Stereo");
+    const std::string device = get_device();
+    Capture capture(device);
     capture.list_devices();
     capture.start_capture();
 
@@ -97,8 +112,8 @@ int main() {
     std::vector<float> fft_freqs = calc_fft_freqs(fft_size, sample_rate);
     spdlog::debug("Sample rate {}, buffer size {}", sample_rate, fft_size);
 
-    const int bin_count = 256;
-    Window window(bin_count);
+    const int num_bins = 256;
+    Window window(num_bins);
 
     while (true) {
         auto start = std::chrono::steady_clock::now();
@@ -106,7 +121,7 @@ int main() {
         std::vector<float> data = capture.data(0);
         std::vector<float> hann = apply_hann(data);
         std::vector<float> fft_output = fft_analyze(hann);
-        std::vector<float> bins = bin(fft_output, fft_freqs, bin_count);
+        std::vector<float> bins = bin(fft_output, fft_freqs, num_bins);
         std::vector<float> normalized = normalize(bins);
 
         window.update(normalized);

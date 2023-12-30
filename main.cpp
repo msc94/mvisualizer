@@ -4,11 +4,38 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <fmt/core.h>
 #include <spdlog/spdlog.h>
 #include <thread>
 
 namespace {
+
+std::vector<float> apply_hann(const std::vector<float> &data) {
+    std::size_t n = data.size();
+    std::vector<float> result(n);
+    for (size_t i = 0; i < n; ++i) {
+        float t = (float)i / (n - 1);
+        float hann = 0.5 - 0.5 * cosf(2 * M_PI * t);
+        result[i] = data[i] * hann;
+    }
+    return result;
+}
+
+std::vector<float> normalize(const std::vector<float> &data) {
+    float max_element = *std::max_element(std::begin(data), std::end(data));
+    if (max_element == 0.0f) {
+        return data;
+    }
+
+    std::size_t n = data.size();
+    std::vector<float> result(n);
+    for (size_t i = 0; i < n; ++i) {
+        result[i] = data[i] / max_element;
+    }
+
+    return result;
+}
 
 std::vector<float> calc_fft_freqs(int fft_size, int sample_rate) {
     std::vector<float> freqs(fft_size / 2);
@@ -77,10 +104,12 @@ int main() {
         auto start = std::chrono::steady_clock::now();
 
         std::vector<float> data = capture.data(0);
-        std::vector<float> fft_output = fft_analyze(data);
+        std::vector<float> hann = apply_hann(data);
+        std::vector<float> fft_output = fft_analyze(hann);
         std::vector<float> bins = bin(fft_output, fft_freqs, bin_count);
+        std::vector<float> normalized = normalize(bins);
 
-        window.update(bins);
+        window.update(normalized);
         bool go = window.render();
         if (!go) {
             break;

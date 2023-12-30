@@ -21,14 +21,7 @@ std::vector<float> fft_analyze(const std::vector<float> &data) {
 
     std::vector<float> magnitudes(N);
     for (std::size_t i = 0; i < magnitudes.size(); i++) {
-        magnitudes[i] = sqrtf(output[i].r * output[i].r + output[i].i * output[i].i);
-    }
-
-    float max_element = *std::max_element(magnitudes.begin(), magnitudes.end());
-    if (max_element > 0.0f) {
-        for (std::size_t i = 0; i < magnitudes.size(); i++) {
-            magnitudes[i] /= max_element;
-        }
+        magnitudes[i] = logf(output[i].r * output[i].r + output[i].i * output[i].i);
     }
 
     return magnitudes;

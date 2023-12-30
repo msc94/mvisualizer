@@ -105,6 +105,7 @@ Capture::Capture(const std::string &device_id) {
 Capture::~Capture() {
     soundio_instream_destroy(instream_);
     soundio_device_unref(device_);
+    soundio_disconnect(soundio_);
     soundio_destroy(soundio_);
 }
 

@@ -22,26 +22,6 @@ std::vector<float> apply_hann(const std::vector<float> &data) {
     return result;
 }
 
-std::vector<float> normalize(const std::vector<float> &data) {
-    constexpr bool normalize = true;
-    if (!normalize) {
-        return data;
-    }
-
-    float max_element = *std::max_element(std::begin(data), std::end(data));
-    if (max_element == 0.0f) {
-        return data;
-    }
-
-    std::size_t n = data.size();
-    std::vector<float> result(n);
-    for (size_t i = 0; i < n; ++i) {
-        result[i] = data[i] / max_element;
-    }
-
-    return result;
-}
-
 std::vector<float> calc_fft_freqs(int fft_size, int sample_rate) {
     std::vector<float> freqs(fft_size / 2);
 
@@ -60,7 +40,7 @@ std::vector<float> bin(const std::vector<float> &fft_output, const std::vector<f
     std::vector<float> bins(num_bins);
 
     const float min_freq = 20.0f;
-    const float max_freq = 5000.0f;
+    const float max_freq = 1000.0f;
     const float base = std::pow(max_freq / min_freq, 1.0 / num_bins);
 
     float current_freq_cutoff = min_freq;
@@ -86,6 +66,22 @@ std::vector<float> bin(const std::vector<float> &fft_output, const std::vector<f
     bins[current_bin] = current_bin_max_magnitude;
 
     return bins;
+}
+
+void normalize(std::vector<float> &data) {
+    constexpr bool normalize = true;
+    if (!normalize) {
+        return;
+    }
+
+    float max_element = *std::max_element(std::begin(data), std::end(data));
+    if (max_element == 0.0f) {
+        return;
+    }
+
+    for (std::size_t i = 0; i < data.size(); i++) {
+        data[i] = data[i] / max_element;
+    }
 }
 
 std::string get_device() {
@@ -122,9 +118,9 @@ int main() {
         std::vector<float> hann = apply_hann(data);
         std::vector<float> fft_output = fft_analyze(hann);
         std::vector<float> bins = bin(fft_output, fft_freqs, num_bins);
-        std::vector<float> normalized = normalize(bins);
+        normalize(bins);
 
-        window.update(normalized);
+        window.update(bins);
         bool go = window.render();
         if (!go) {
             break;

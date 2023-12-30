@@ -21,7 +21,9 @@ std::vector<float> fft_analyze(const std::vector<float> &data) {
 
     std::vector<float> magnitudes(N);
     for (std::size_t i = 0; i < magnitudes.size(); i++) {
-        magnitudes[i] = logf(output[i].r * output[i].r + output[i].i * output[i].i);
+        float power = output[i].r * output[i].r + output[i].i * output[i].i;
+        float magnitude = sqrt(power);
+        magnitudes[i] = 20.0f * log10f(magnitude);
     }
 
     return magnitudes;
